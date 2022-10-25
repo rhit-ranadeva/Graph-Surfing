@@ -369,10 +369,10 @@ public class AdjacencyMatrixGraph<T> extends Graph<T>
 			// Fix the row at the right index
 			this.fixedIndex = keyToIndex.get(key);
 			
-			// Start at index 0 of the row
+			// Start at index 0
 			this.index = 0;
 			
-			// If no edge exists at [row][0]...
+			// If no edge exists...
 			if (this.noEdge())
 			{
 				// Move to the next index in matrix with an edge!
@@ -421,7 +421,7 @@ public class AdjacencyMatrixGraph<T> extends Graph<T>
 		@Override
 		public boolean hasNext() 
 		{
-			// Make sure our index is in range for successor indices
+			// Make sure our index is in range for variable indices
 			return this.index < size();
 		}
 		

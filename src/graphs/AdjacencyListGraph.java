@@ -349,7 +349,7 @@ public class AdjacencyListGraph<T> extends Graph<T>
 			// Start at index 0 of the List
 			this.index = 0;
 			
-			// Initialize predecessor list by accessing the right Vertex
+			// Initialize verticesOfInterest list by accessing the right Vertex
 			if (successors)
 			{
 				this.verticesOfInterest = keyToVertex.get(key).successors;				
