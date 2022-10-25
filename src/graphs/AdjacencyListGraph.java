@@ -26,16 +26,6 @@ public class AdjacencyListGraph<T> extends Graph<T>
 	Map<T,Vertex> keyToVertex;
 	
 	/**
-	 * Number of vertices
-	 */
-	int size;
-	
-	/**
-	 * Number of edges
-	 */
-	int numEdges;
-	
-	/**
 	 * Class representing a Vertex in the Graph
 	 * 
 	 * @author Vineet Ranade
@@ -101,24 +91,6 @@ public class AdjacencyListGraph<T> extends Graph<T>
 			// Increment size since we added a Vertex
 			this.size++;
 		}
-	}
-
-	@Override
-	public int size()
-	{
-		// TODO Auto-generated method stub
-		
-		// Use field
-		return this.size;
-	}
-
-	@Override
-	public int numEdges()
-	{
-		// TODO Auto-generated method stub
-		
-		// Use field
-		return this.numEdges;
 	}
 
 	@Override

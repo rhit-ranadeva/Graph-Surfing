@@ -34,16 +34,6 @@ public class AdjacencyMatrixGraph<T> extends Graph<T>
 	 * Adjacency matrix
 	 */
 	int[][] matrix;
-
-	/**
-	 * Number of vertices
-	 */
-	int size;
-	
-	/**
-	 * Number of edges
-	 */
-	int numEdges;
 	
 	/**
 	 * Constructs an AdjacencyMatrixGraph
@@ -79,24 +69,6 @@ public class AdjacencyMatrixGraph<T> extends Graph<T>
 			// Increment index for next key
 			index++;
 		}
-	}
-	
-	@Override
-	public int size()
-	{
-		// TODO Auto-generated method stub
-		
-		// Use field
-		return this.size;
-	}
-
-	@Override
-	public int numEdges()
-	{
-		// TODO Auto-generated method stub
-		
-		// Use field
-		return this.numEdges;
 	}
 
 	@Override

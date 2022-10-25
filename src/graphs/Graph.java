@@ -9,24 +9,44 @@ import java.util.Set;
  * Abstract class to represent the Graph ADT. It is assumed that every vertex contains some 
  * data of type T, which serves as the identity of that node and provides access to it.
  * 
- * @author Nate Chenette
+ * @author Nate Chenette and Vineet Ranade
  *
  * @param <T>
+ * 		Generic comparable type of Graph elements
  */
-public abstract class Graph<T> {
+public abstract class Graph<T> 
+{
+	/**
+	 * Number of vertices
+	 */
+	int size;
+	
+	/**
+	 * Number of edges
+	 */
+	int numEdges;
 	
 	/**
 	 * Returns the number of vertices in the graph.
 	 * @return
+	 * 		The number of vertices in the graph
 	 */
-	public abstract int size();
-	
+	public int size()
+	{
+		// Simply use the field
+		return this.size;
+	}
 
 	/**
 	 * Returns the number of edges in the graph.
 	 * @return
+	 * 		The number of edges in the graph
 	 */
-	public abstract int numEdges();
+	public int numEdges()
+	{
+		// Simply use the field
+		return this.numEdges;
+	}
 
 	
 	/**
