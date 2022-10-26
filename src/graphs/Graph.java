@@ -164,10 +164,7 @@ public abstract class Graph<T>
 			throw new NoSuchElementException();
 		}
 		
-		/**
-		 * Final set to return
-		 */
-		Set<T> forwards = new HashSet<T>();
+		Set<T> forwardsOnly = new HashSet<T>();
 		
 		Set<T> visited = new HashSet<T>();
 		
@@ -177,7 +174,7 @@ public abstract class Graph<T>
 		while (!toVisit.isEmpty())
 		{
 			T vertexToVisit = toVisit.pop();
-			forwards.add(vertexToVisit);
+			forwardsOnly.add(vertexToVisit);
 			visited.add(vertexToVisit);
 			
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
@@ -192,15 +189,15 @@ public abstract class Graph<T>
 		}
 		
 		visited = new HashSet<T>();
-		Set<T> backwards = new HashSet<T>();
+		Set<T> scc = new HashSet<T>();
 		
 		toVisit.push(key);
 		while (!toVisit.isEmpty())
 		{
 			T vertexToVisit = toVisit.pop();
-			if (forwards.contains(vertexToVisit))
+			if (forwardsOnly.contains(vertexToVisit))
 			{
-				backwards.add(vertexToVisit);
+				scc.add(vertexToVisit);
 			}
 			visited.add(vertexToVisit);
 			
@@ -215,7 +212,7 @@ public abstract class Graph<T>
 			}
 		}
 		
-		return backwards;
+		return scc;
 	}
 	
 	/**
@@ -340,5 +337,77 @@ public abstract class Graph<T>
 			retList.add(curVertex);
 		}
 	}
+	
+	public class StartEnd
+	{
+		T start;
+		T end;
+		public StartEnd()
+		{
+			this.start = null;
+			this.end = null;
+		}
+		
+		public String toString()
+		{
+			return this.start.toString() + " and " + this.end.toString();
+		}
+	}
+	
+	public StartEnd longestShortestPath()
+	{
+
+		StartEnd retVal = new StartEnd();
+//		Set<Set<T>> allComponents = getComponents();
+
+		System.out.println("Finding path above threshold...");
+		int maxLength = 17;
+		List<T> path;
+		int pathLength;
+		for (T startVertex : keySet())
+		{
+			for (T endVertex : keySet())
+			{
+				path = shortestPath(startVertex, endVertex);
+				if (path != null)
+				{
+					pathLength = path.size();
+					if (pathLength > maxLength)
+					{
+						retVal.start = startVertex;
+						retVal.end = endVertex;
+						maxLength = pathLength;
+						return retVal;
+					}
+				}
+			}
+		}
+		return retVal;
+	}
+	
+//	public Set<Set<T>> getComponents()
+//	{
+//		System.out.println("Getting components...");
+//		Set<T> allVertices = keySet();
+//		Set<T> seen = new HashSet<T>();
+//		Set<Set<T>> allSCCs = new HashSet<Set<T>>();
+//		Set<T> curComponent = new HashSet<T>();
+//		for (T vertex : allVertices)
+//		{
+//			if (!seen.contains(vertex))
+//			{
+//				curComponent = stronglyConnectedComponent(vertex);
+//				allSCCs.add(curComponent);
+//				for (T item : curComponent)
+//				{
+//					seen.add(item);
+//				}
+//			}
+//			System.out.println(allSCCs.size());
+//		}
+//
+//		System.out.println("Done getting components!");
+//		return allSCCs;
+//	}
 }
 
