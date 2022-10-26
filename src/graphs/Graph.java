@@ -149,6 +149,112 @@ public abstract class Graph<T>
 	 */
 	public abstract Iterator<T> predecessorIterator(T key) throws NoSuchElementException;
 	
+
+//	/** Finds the strongly-connected component of the provided key.
+//	 * @param key
+//	 * @return a set containing all data in the strongly connected component of the vertex
+//	 * containing key 
+//	 * @throws NoSuchElementException if the key is not found in the graph
+//	 */
+//	public Set<T> stronglyConnectedComponent(T key) throws NoSuchElementException
+//	{
+//		// Vertex must exist
+//		if (!this.hasVertex(key))
+//		{
+//			throw new NoSuchElementException();
+//		}
+//		
+//		/**
+//		 * Final set to return
+//		 */
+//		Set<T> scc = new HashSet<T>();
+//		
+//		Set<T> reachableFromKey = new HashSet<T>();
+//		
+//		/**
+//		 * Set of visited Vertices
+//		 */
+//		Set<T> visited = new HashSet<T>();
+//		
+//		/**
+//		 * Stack of Vertices to visit for depth-first search
+//		 */
+//		Stack<T> toVisit = new Stack<T>();
+//		
+//		toVisit.add(key);
+//		scc.add(key);
+//		
+//		while (!toVisit.isEmpty())
+//		{
+//			System.out.println("Finding reachables");
+//			T vertexToVisit = toVisit.pop();
+//			if (!vertexToVisit.equals(key))
+//			{
+//				reachableFromKey.add(vertexToVisit);				
+//			}
+//			visited.add(vertexToVisit);
+//			
+//			Iterator<T> successorIterator = successorIterator(vertexToVisit);
+//			while (successorIterator.hasNext())
+//			{
+//				T neighbor = successorIterator.next();
+//				if (!visited.contains(neighbor) && !neighbor.equals(key))
+//				{
+//					toVisit.push(neighbor);
+//				}
+//			}
+//		}
+//		
+//		/**
+//		 * Maps successor to its predecessor
+//		 */
+//		Map<T, T> childToParent = new HashMap<T, T>();
+//		
+//		for (T vertex : reachableFromKey)
+//		{
+//			System.out.println("adding to scc");
+//			if (!scc.contains(vertex))
+//			{
+//				visited = new HashSet<T>();
+//				toVisit = new Stack<T>();
+//				
+//				toVisit.add(vertex);
+//				while (!toVisit.isEmpty())
+//				{
+//					T vertexToVisit = toVisit.pop();
+//					visited.add(vertexToVisit);
+//					
+//					Iterator<T> successorIterator = successorIterator(vertexToVisit);
+//					while (successorIterator.hasNext())
+//					{
+//						T neighbor = successorIterator.next();
+//						if (neighbor.equals(key))
+//						{
+//							childToParent.put(neighbor, vertexToVisit);
+//							T cur = vertexToVisit;
+//							while (cur != vertex)
+//							{
+//								scc.add(cur);
+//								System.out.println("Added to scc");
+//								cur = childToParent.get(cur);
+//							}
+//							System.out.println("Added to scc");
+//							scc.add(cur);
+//						}
+//						else if (!visited.contains(neighbor))
+//						{
+//							childToParent.put(neighbor, vertexToVisit);
+//							toVisit.push(neighbor);
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		// Return the final Set
+//		return scc;
+//	}	
+	
 	/**
 	 * Finds the strongly-connected component of the provided key.
 	 * @param key
@@ -184,11 +290,12 @@ public abstract class Graph<T>
 		 */
 		Map<T, T> childToParent = new HashMap<T, T>();
 		
-		Set<T> visitedShort = new HashSet<T>();
-		Set<T> endOfCycle = new HashSet<T>();
+		/**
+		 * Maps the end of a cycle to all Vertices before it
+		 */
 		Map<T, Set<T>> cycleMap = new HashMap<T, Set<T>>();
 
-		// Add the key, obviously to scc
+		// Add the key, obviously, to scc first
 		scc.add(key);
 		
 		// Begin with the key
@@ -200,7 +307,6 @@ public abstract class Graph<T>
 			// Pop the stack and add to visited
 			T vertexToVisit = toVisit.pop();
 			visited.add(vertexToVisit);
-			visitedShort.add(vertexToVisit);
 
 			// For each successor of this Vertex...
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
@@ -222,28 +328,30 @@ public abstract class Graph<T>
 					if (neighbor.equals(key) || scc.contains(neighbor))
 					{
 						// Add this Vertex and everything before it to scc
-						T cur = vertexToVisit;
-						while (!cur.equals(key))
+						T curVertex = vertexToVisit;
+						while (!curVertex.equals(key))
 						{
-							scc.add(cur);
-							if (endOfCycle.contains(cur))
+							if (scc.add(curVertex) && cycleMap.containsKey(curVertex))
 							{
-								for (T directPred : cycleMap.get(cur))
+								for (T directPredecessor : cycleMap.get(curVertex))
 								{
-									T inCur = directPred;
-									while (!scc.contains(inCur))
+									T curCycleVertex = directPredecessor;
+									while (!scc.contains(curCycleVertex))
 									{
-										scc.add(inCur);
-										inCur = childToParent.get(inCur);
+										scc.add(curCycleVertex);
+										curCycleVertex = childToParent.get(curCycleVertex);
 									}									
 								}
 							}
-							cur = childToParent.get(cur);
+							curVertex = childToParent.get(curVertex);
 						}
+						cycleMap.clear();
 					}
+					
+					// Otherwise, we don't know if this seen root will be part of scc...
 					else
 					{
-						endOfCycle.add(neighbor);
+						// So track this detected cycle and move on
 						Set<T> newPreds = new HashSet<T>();
 						if (cycleMap.get(neighbor) == null)
 						{
@@ -256,6 +364,7 @@ public abstract class Graph<T>
 						}
 						cycleMap.put(neighbor, newPreds);
 					}
+
 				}
 			}
 		}
