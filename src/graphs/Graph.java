@@ -149,63 +149,6 @@ public abstract class Graph<T>
 	 */
 	public abstract Iterator<T> predecessorIterator(T key) throws NoSuchElementException;
 	
-
-//	/** Finds the strongly-connected component of the provided key.
-//	 * @param key
-//	 * @return a set containing all data in the strongly connected component of the vertex
-//	 * containing key 
-//	 * @throws NoSuchElementException if the key is not found in the graph
-//	 */
-//	public Set<T> stronglyConnectedComponent(T key) throws NoSuchElementException
-//	{
-//		// Vertex must exist
-//		if (!this.hasVertex(key))
-//		{
-//			throw new NoSuchElementException();
-//		}
-//		
-//		/**
-//		 * Final set to return
-//		 */
-//		Set<T> scc = new HashSet<T>();
-//		
-//		/**
-//		 * Set of visited Vertices
-//		 */
-//		Set<T> visited = new HashSet<T>();
-//		
-//		/**
-//		 * Stack of Vertices to visit for depth-first search
-//		 */
-//		Stack<T> toVisit = new Stack<T>();
-//		
-//		toVisit.add(key);
-//		
-//		while (!toVisit.isEmpty())
-//		{
-//			T vertexToVisit = toVisit.pop();
-//			if (shortestPath(vertexToVisit, key) != null)
-//			{
-//				scc.add(vertexToVisit);
-//			}
-//			visited.add(vertexToVisit);
-//			
-//			Iterator<T> successorIterator = successorIterator(vertexToVisit);
-//			while (successorIterator.hasNext())
-//			{
-//				T neighbor = successorIterator.next();
-//				if (!visited.contains(neighbor))
-//				{
-//					toVisit.push(neighbor);
-//				}
-//			}
-//		}
-//		
-//		
-//		// Return the final Set
-//		return scc;
-//	}	
-	
 	/**
 	 * Finds the strongly-connected component of the provided key.
 	 * @param key
