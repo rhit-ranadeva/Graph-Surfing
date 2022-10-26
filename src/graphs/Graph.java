@@ -167,105 +167,56 @@ public abstract class Graph<T>
 		/**
 		 * Final set to return
 		 */
-		Set<T> scc = new HashSet<>();
+		Set<T> forwards = new HashSet<T>();
 		
-		/**
-		 * Set of visited Vertices
-		 */
-		Set<T> visited = new HashSet<>();
+		Set<T> visited = new HashSet<T>();
 		
-		/**
-		 * Stack of Vertices to visit for depth-first search
-		 */
-		Stack<T> toVisit = new Stack<>();
+		Stack<T> toVisit = new Stack<T>();
 		
-		/**
-		 * Maps successor to its predecessor
-		 */
-		Map<T, T> childToParent = new HashMap<T, T>();
-		
-		/**
-		 * Maps the end of a cycle to all Vertices before it
-		 */
-		Map<T, Set<T>> cycleMap = new HashMap<T, Set<T>>();
-
-		// Add the key, obviously, to scc first
-		scc.add(key);
-		
-		// Begin with the key
-		toVisit.add(key);
-		
-		// While we have elements in the toVisit stack...
+		toVisit.push(key);
 		while (!toVisit.isEmpty())
 		{
-			// Pop the stack and add to visited
 			T vertexToVisit = toVisit.pop();
+			forwards.add(vertexToVisit);
 			visited.add(vertexToVisit);
-
-			// For each successor of this Vertex...
+			
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
 			while (successorIterator.hasNext())
 			{
-				// If we haven't seen this neighbor before...
 				T neighbor = successorIterator.next();
 				if (!visited.contains(neighbor))
 				{
-					// Update mapping and push to the toVisit stack
-					childToParent.put(neighbor, vertexToVisit);
 					toVisit.push(neighbor);
-				}
-				
-				// Otherwise, we've seen this neighbor before...
-				else
-				{
-					// If we found the root or another node which we know goes to the root...
-					if (neighbor.equals(key) || scc.contains(neighbor))
-					{
-						// Add this Vertex and everything before it to scc
-						T curVertex = vertexToVisit;
-						while (!curVertex.equals(key))
-						{
-							if (scc.add(curVertex) && cycleMap.containsKey(curVertex))
-							{
-								for (T directPredecessor : cycleMap.get(curVertex))
-								{
-									T curCycleVertex = directPredecessor;
-									while (!scc.contains(curCycleVertex))
-									{
-										scc.add(curCycleVertex);
-										curCycleVertex = childToParent.get(curCycleVertex);
-									}									
-								}
-							}
-							curVertex = childToParent.get(curVertex);
-						}
-						cycleMap.clear();
-					}
-					
-					// Otherwise, we don't know if this seen root will be part of scc...
-					else
-					{
-						// So track this detected cycle and move on
-						Set<T> newPreds = new HashSet<T>();
-						if (cycleMap.get(neighbor) == null)
-						{
-							newPreds.add(vertexToVisit);
-						}
-						else
-						{
-							newPreds = cycleMap.get(neighbor);
-							newPreds.add(vertexToVisit);
-						}
-						cycleMap.put(neighbor, newPreds);
-					}
-
 				}
 			}
 		}
-
-		// Return the final Set
-		return scc;
-	}	
+		
+		visited = new HashSet<T>();
+		Set<T> backwards = new HashSet<T>();
+		
+		toVisit.push(key);
+		while (!toVisit.isEmpty())
+		{
+			T vertexToVisit = toVisit.pop();
+			if (forwards.contains(vertexToVisit))
+			{
+				backwards.add(vertexToVisit);
+			}
+			visited.add(vertexToVisit);
+			
+			Iterator<T> predecessorIterator = predecessorIterator(vertexToVisit);
+			while (predecessorIterator.hasNext())
+			{
+				T neighbor = predecessorIterator.next();
+				if (!visited.contains(neighbor))
+				{
+					toVisit.push(neighbor);
+				}
+			}
+		}
+		
+		return backwards;
+	}
 	
 	/**
 	 * Searches for the shortest path between start and end points in the graph.
