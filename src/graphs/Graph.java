@@ -1,10 +1,12 @@
 package graphs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
@@ -157,83 +159,115 @@ public abstract class Graph<T>
 	
 	/**
 	 * Searches for the shortest path between start and end points in the graph.
-	 * @param start
-	 * @param end
+	 * @param startLabel
+	 * @param endLabel
 	 * @return a list of data, starting with start and ending with end, that gives the path through
 	 * the graph, or null if no such path is found.  
 	 * @throws NoSuchElementException if either key is not found in the graph
 	 */
 	public List<T> shortestPath(T startLabel, T endLabel) throws NoSuchElementException
 	{
+		// Both Vertices must exist
 		if (!this.hasVertex(startLabel) || !this.hasVertex(endLabel))
 		{
 			throw new NoSuchElementException();
 		}
 		
-		Set<T> visited = new HashSet<>();
+		// If we get a degenerate case...return a List with startLabel
+		if (startLabel.equals(endLabel))
+		{
+			List<T> retList = new ArrayList<T>();
+			retList.add(startLabel);
+			return retList;
+		}
+		
+		/**
+		 * Tracks visited Vertices
+		 */
+		Set<T> visited = new HashSet<T>();
+		
+		/**
+		 * Queue of Vertices to visit for breadth-first search
+		 */
 		Queue<T> toVisit = new LinkedList<>();
 		
+		/**
+		 * Maps a Vertex to the predecessor which added it to toVisit
+		 */
+		Map<T, T> childToParent = new HashMap<T, T>();
+		
+		// Begin with startLabel
 		toVisit.add(startLabel);
 		
+		// While we have Vertices to visit...
 		while (!toVisit.isEmpty())
 		{
+			// Dequeue to find next Vertex to visit
 			T vertexToVisit = toVisit.poll();
+			
+			// Update visited
 			visited.add(vertexToVisit);
 			
-			if (vertexToVisit.equals(endLabel))
-			{	
-				// TODO: you're returning EVERY item traversed to get here instead of the most direct path.
-				ArrayList<T> retList = new ArrayList<T>();
-				boolean found = false;
-				
-				T curElement = endLabel;
-				
-				while (!found)
-				{
-					retList.add(0, curElement);
-					if (curElement.equals(startLabel))
-					{
-						found = true;
-					}
-					
-					Iterator<T> predecessorIterator = predecessorIterator(curElement);
-					boolean predecessorFound = false;
-					while (!found && !predecessorFound)
-					{
-						T predecessor = predecessorIterator.next();
-						if (visited.contains(predecessor))
-						{
-							visited.remove(predecessor);
-							curElement = predecessor;
-							predecessorFound = true;
-						}
-					}					
-				}
-				return retList;
-			}
-			
+			// For each successor of this Vertex...
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
 			while (successorIterator.hasNext())
 			{
 				T neighbor = successorIterator.next();
+				
+				// If this successor hasn't been visited and isn't already in the queue...
 				if (!visited.contains(neighbor) && !toVisit.contains(neighbor))
 				{
+					// Update the mapping
+					childToParent.put(neighbor, vertexToVisit);
+					
+					// Enqueue this successor
 					toVisit.offer(neighbor);
+					
+					// If we've found our destination...
+					if (neighbor.equals(endLabel))
+					{
+						// Create empty ArrayList
+						ArrayList<T> retList = new ArrayList<T>();
+						
+						// Call recursive helper to populate retList and return
+						this.populateList(startLabel, neighbor, childToParent, retList);
+						return retList;
+					}
 				}
 			}
 		}
 		
+		// If we couldn't find a path, return null
 		return null;
 	}
 	
-	class ItemAndLevel
+	/**
+	 * Populates a List with shortest path
+	 * 
+	 * @param startLabel
+	 * 		The label of the staring Vertex
+	 * @param curVertex
+	 * 		The current Vertex
+	 * @param childToParent
+	 * 		Maps a Vertex to its predecessor in the shortest path
+	 * @param retList
+	 * 		The List to populate
+	 */
+	public void populateList(T startLabel, T curVertex, Map<T, T> childToParent, List<T> retList)
 	{
-		T item;
-		int level;
-		public ItemAndLevel(T item, int level)
+		// Base case: if we're at the starting Vertex...
+		if (curVertex.equals(startLabel))
 		{
-			this.item = item;
-			this.level = level;
+			// Add to List
+			retList.add(curVertex);
+		}
+		
+		// Recursive case: otherwise...
+		else
+		{
+			// Add everything coming before curVertex in the shortest Path, then add curVertex
+			populateList(startLabel, childToParent.get(curVertex), childToParent, retList);
+			retList.add(curVertex);
 		}
 	}
 }
