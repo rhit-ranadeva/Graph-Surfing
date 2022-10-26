@@ -169,8 +169,6 @@ public abstract class Graph<T>
 //		 */
 //		Set<T> scc = new HashSet<T>();
 //		
-//		Set<T> reachableFromKey = new HashSet<T>();
-//		
 //		/**
 //		 * Set of visited Vertices
 //		 */
@@ -182,15 +180,13 @@ public abstract class Graph<T>
 //		Stack<T> toVisit = new Stack<T>();
 //		
 //		toVisit.add(key);
-//		scc.add(key);
 //		
 //		while (!toVisit.isEmpty())
 //		{
-//			System.out.println("Finding reachables");
 //			T vertexToVisit = toVisit.pop();
-//			if (!vertexToVisit.equals(key))
+//			if (shortestPath(vertexToVisit, key) != null)
 //			{
-//				reachableFromKey.add(vertexToVisit);				
+//				scc.add(vertexToVisit);
 //			}
 //			visited.add(vertexToVisit);
 //			
@@ -198,59 +194,14 @@ public abstract class Graph<T>
 //			while (successorIterator.hasNext())
 //			{
 //				T neighbor = successorIterator.next();
-//				if (!visited.contains(neighbor) && !neighbor.equals(key))
+//				if (!visited.contains(neighbor))
 //				{
 //					toVisit.push(neighbor);
 //				}
 //			}
 //		}
 //		
-//		/**
-//		 * Maps successor to its predecessor
-//		 */
-//		Map<T, T> childToParent = new HashMap<T, T>();
 //		
-//		for (T vertex : reachableFromKey)
-//		{
-//			System.out.println("adding to scc");
-//			if (!scc.contains(vertex))
-//			{
-//				visited = new HashSet<T>();
-//				toVisit = new Stack<T>();
-//				
-//				toVisit.add(vertex);
-//				while (!toVisit.isEmpty())
-//				{
-//					T vertexToVisit = toVisit.pop();
-//					visited.add(vertexToVisit);
-//					
-//					Iterator<T> successorIterator = successorIterator(vertexToVisit);
-//					while (successorIterator.hasNext())
-//					{
-//						T neighbor = successorIterator.next();
-//						if (neighbor.equals(key))
-//						{
-//							childToParent.put(neighbor, vertexToVisit);
-//							T cur = vertexToVisit;
-//							while (cur != vertex)
-//							{
-//								scc.add(cur);
-//								System.out.println("Added to scc");
-//								cur = childToParent.get(cur);
-//							}
-//							System.out.println("Added to scc");
-//							scc.add(cur);
-//						}
-//						else if (!visited.contains(neighbor))
-//						{
-//							childToParent.put(neighbor, vertexToVisit);
-//							toVisit.push(neighbor);
-//						}
-//					}
-//				}
-//			}
-//		}
-//
 //		// Return the final Set
 //		return scc;
 //	}	
