@@ -1,8 +1,12 @@
 package graphs;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -159,7 +163,78 @@ public abstract class Graph<T>
 	 * the graph, or null if no such path is found.  
 	 * @throws NoSuchElementException if either key is not found in the graph
 	 */
-	public abstract List<T> shortestPath(T startLabel, T endLabel) throws NoSuchElementException;
+	public List<T> shortestPath(T startLabel, T endLabel) throws NoSuchElementException
+	{
+		if (!this.hasVertex(startLabel) || !this.hasVertex(endLabel))
+		{
+			throw new NoSuchElementException();
+		}
 		
+		Set<T> visited = new HashSet<>();
+		Queue<T> toVisit = new LinkedList<>();
+		
+		toVisit.add(startLabel);
+		
+		while (!toVisit.isEmpty())
+		{
+			T vertexToVisit = toVisit.poll();
+			visited.add(vertexToVisit);
+			
+			if (vertexToVisit.equals(endLabel))
+			{	
+				// TODO: you're returning EVERY item traversed to get here instead of the most direct path.
+				ArrayList<T> retList = new ArrayList<T>();
+				boolean found = false;
+				
+				T curElement = endLabel;
+				
+				while (!found)
+				{
+					retList.add(0, curElement);
+					if (curElement.equals(startLabel))
+					{
+						found = true;
+					}
+					
+					Iterator<T> predecessorIterator = predecessorIterator(curElement);
+					boolean predecessorFound = false;
+					while (!found && !predecessorFound)
+					{
+						T predecessor = predecessorIterator.next();
+						if (visited.contains(predecessor))
+						{
+							visited.remove(predecessor);
+							curElement = predecessor;
+							predecessorFound = true;
+						}
+					}					
+				}
+				return retList;
+			}
+			
+			Iterator<T> successorIterator = successorIterator(vertexToVisit);
+			while (successorIterator.hasNext())
+			{
+				T neighbor = successorIterator.next();
+				if (!visited.contains(neighbor) && !toVisit.contains(neighbor))
+				{
+					toVisit.offer(neighbor);
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+	class ItemAndLevel
+	{
+		T item;
+		int level;
+		public ItemAndLevel(T item, int level)
+		{
+			this.item = item;
+			this.level = level;
+		}
+	}
 }
 

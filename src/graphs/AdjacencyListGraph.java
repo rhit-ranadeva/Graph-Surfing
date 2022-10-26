@@ -376,11 +376,11 @@ public class AdjacencyListGraph<T> extends Graph<T>
 		return null;
 	}
 
-	@Override
-	public List<T> shortestPath(T startLabel, T endLabel)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public List<T> shortestPath(T startLabel, T endLabel)
+//	{
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 
 }
