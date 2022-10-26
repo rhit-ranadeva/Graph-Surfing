@@ -231,7 +231,7 @@ public abstract class Graph<T>
 								for (T directPred : cycleMap.get(cur))
 								{
 									T inCur = directPred;
-									while (!scc.contains(cur))
+									while (!scc.contains(inCur))
 									{
 										scc.add(inCur);
 										inCur = childToParent.get(inCur);
@@ -257,7 +257,6 @@ public abstract class Graph<T>
 						cycleMap.put(neighbor, newPreds);
 					}
 				}
-				// TODO: missing case where a Node has MULTIPLE predecessors
 			}
 		}
 
