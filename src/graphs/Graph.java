@@ -164,17 +164,18 @@ public abstract class Graph<T>
 			throw new NoSuchElementException();
 		}
 		
-		Set<T> scc = new HashSet<>();
-		Set<T> visited = new HashSet<>();
-		Stack<T> toVisit = new Stack<>();
-		Map<T, T> childToParent = new HashMap<T, T>();
+		Set<T> scc = new HashSet<T>();
 		
-		scc.add(key);
+		Set<T> visited = new HashSet<T>();
+		Stack<T> toVisit = new Stack<T>();
+		
+		Queue<T> depthFirstTraversal = new LinkedList<T>();
+		
 		toVisit.add(key);
-		
 		while (!toVisit.isEmpty())
 		{
 			T vertexToVisit = toVisit.pop();
+			depthFirstTraversal.offer(vertexToVisit);
 			visited.add(vertexToVisit);
 			
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
@@ -183,19 +184,33 @@ public abstract class Graph<T>
 				T neighbor = successorIterator.next();
 				if (!visited.contains(neighbor))
 				{
-					childToParent.put(neighbor, vertexToVisit);
+					toVisit.push(neighbor);
+				}
+			}
+		}
+		
+		visited = new HashSet<T>();
+		toVisit = new Stack<T>();
+		
+		toVisit.add(key);
+		while (!toVisit.isEmpty())
+		{
+			T vertexToVisit = toVisit.pop();
+			visited.add(vertexToVisit);
+			
+			Iterator<T> predecessorIterator = predecessorIterator(vertexToVisit);
+			while (predecessorIterator.hasNext())
+			{
+				T neighbor = predecessorIterator.next();
+				if (!visited.contains(neighbor))
+				{
 					toVisit.push(neighbor);
 				}
 				else
 				{
-					if (neighbor.equals(key) || scc.contains(neighbor))
+					if (neighbor.equals(key))
 					{
-						T cur = vertexToVisit;
-						while (!cur.equals(key))
-						{
-							scc.add(cur);
-							cur = childToParent.get(cur);
-						}
+						
 					}
 				}
 			}
