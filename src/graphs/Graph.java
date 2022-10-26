@@ -192,6 +192,12 @@ public abstract class Graph<T>
 		Queue<T> toVisit = new LinkedList<>();
 		
 		/**
+		 * Set of Vertices to visit.
+		 * Seems redundant but was needed for 
+		 */
+		Set<T> toVisitSet = new HashSet<T>();
+		
+		/**
 		 * Maps a Vertex to the predecessor which added it to toVisit
 		 */
 		Map<T, T> childToParent = new HashMap<T, T>();
@@ -204,6 +210,7 @@ public abstract class Graph<T>
 		{
 			// Dequeue to find next Vertex to visit
 			T vertexToVisit = toVisit.poll();
+			toVisitSet.remove(vertexToVisit);
 			
 			// Update visited
 			visited.add(vertexToVisit);
@@ -215,13 +222,17 @@ public abstract class Graph<T>
 				T neighbor = successorIterator.next();
 				
 				// If this successor hasn't been visited and isn't already in the queue...
-				if (!visited.contains(neighbor) && !toVisit.contains(neighbor))
+				if (!visited.contains(neighbor))
 				{
-					// Update the mapping
-					childToParent.put(neighbor, vertexToVisit);
+					if (!toVisitSet.contains(neighbor))
+					{
+						// Update the mapping
+						childToParent.put(neighbor, vertexToVisit);					
+					}
 					
 					// Enqueue this successor
 					toVisit.offer(neighbor);
+					toVisitSet.add(neighbor);
 					
 					// If we've found our destination...
 					if (neighbor.equals(endLabel))
