@@ -155,7 +155,39 @@ public abstract class Graph<T>
 	 * containing key 
 	 * @throws NoSuchElementException if the key is not found in the graph
 	 */
-	public abstract Set<T> stronglyConnectedComponent(T key) throws NoSuchElementException;
+	public Set<T> stronglyConnectedComponent(T key) throws NoSuchElementException
+	{
+		// Vertex must exist
+		if (!this.hasVertex(key))
+		{
+			throw new NoSuchElementException();
+		}
+		
+		Set<T> scc = new HashSet<T>();
+		
+		scc.add(key);
+		
+		sccHelper(key, scc);
+		
+		return scc;
+	}
+	
+	private void sccHelper(T key, Set<T> scc)
+	{
+		Iterator<T> successorIterator = successorIterator(key);
+		
+		while (successorIterator.hasNext())
+		{
+			T successor = successorIterator.next();
+			if (!scc.contains(successor) && shortestPath(successor, key) != null)
+			{
+				scc.add(successor);
+				sccHelper(successor, scc);
+			}
+		}
+	}
+	
+	
 	
 	/**
 	 * Searches for the shortest path between start and end points in the graph.
@@ -222,13 +254,10 @@ public abstract class Graph<T>
 				T neighbor = successorIterator.next();
 				
 				// If this successor hasn't been visited and isn't already in the queue...
-				if (!visited.contains(neighbor))
+				if (!visited.contains(neighbor) && !toVisitSet.contains(neighbor))
 				{
-					if (!toVisitSet.contains(neighbor))
-					{
-						// Update the mapping
-						childToParent.put(neighbor, vertexToVisit);					
-					}
+					// Update the mapping
+					childToParent.put(neighbor, vertexToVisit);
 					
 					// Enqueue this successor
 					toVisit.offer(neighbor);
@@ -264,7 +293,7 @@ public abstract class Graph<T>
 	 * @param retList
 	 * 		The List to populate
 	 */
-	public void populateList(T startLabel, T curVertex, Map<T, T> childToParent, List<T> retList)
+	private void populateList(T startLabel, T curVertex, Map<T, T> childToParent, List<T> retList)
 	{
 		// Base case: if we're at the starting Vertex...
 		if (curVertex.equals(startLabel))

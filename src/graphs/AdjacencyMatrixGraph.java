@@ -433,13 +433,13 @@ public class AdjacencyMatrixGraph<T> extends Graph<T>
 		return new SuccessorOrPredecessorIterator(key, false);
 	}
 
-	@Override
-	public Set<T> stronglyConnectedComponent(T key)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+//	@Override
+//	public Set<T> stronglyConnectedComponent(T key)
+//	{
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+//
 //	@Override
 //	public List<T> shortestPath(T startLabel, T endLabel)
 //	{
