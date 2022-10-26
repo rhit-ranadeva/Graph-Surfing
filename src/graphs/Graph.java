@@ -356,17 +356,17 @@ public abstract class Graph<T>
 	
 	public StartEnd longestShortestPath()
 	{
-
 		StartEnd retVal = new StartEnd();
-//		Set<Set<T>> allComponents = getComponents();
-
-		System.out.println("Finding path above threshold...");
-		int maxLength = 17;
+		int maxLength = 0;
 		List<T> path;
+		List<T> maxPath = new ArrayList<T>();
 		int pathLength;
-		for (T startVertex : keySet())
+		
+		Set<T> searchSet = keySet();
+		
+		for (T startVertex : searchSet)
 		{
-			for (T endVertex : keySet())
+			for (T endVertex : searchSet)
 			{
 				path = shortestPath(startVertex, endVertex);
 				if (path != null)
@@ -376,38 +376,16 @@ public abstract class Graph<T>
 					{
 						retVal.start = startVertex;
 						retVal.end = endVertex;
+						maxPath = path;
 						maxLength = pathLength;
-						return retVal;
+						System.out.println("New max length: " + maxLength + "--" + retVal.toString());
 					}
 				}
+				
 			}
 		}
+		System.out.println(maxPath);
 		return retVal;
 	}
-	
-//	public Set<Set<T>> getComponents()
-//	{
-//		System.out.println("Getting components...");
-//		Set<T> allVertices = keySet();
-//		Set<T> seen = new HashSet<T>();
-//		Set<Set<T>> allSCCs = new HashSet<Set<T>>();
-//		Set<T> curComponent = new HashSet<T>();
-//		for (T vertex : allVertices)
-//		{
-//			if (!seen.contains(vertex))
-//			{
-//				curComponent = stronglyConnectedComponent(vertex);
-//				allSCCs.add(curComponent);
-//				for (T item : curComponent)
-//				{
-//					seen.add(item);
-//				}
-//			}
-//			System.out.println(allSCCs.size());
-//		}
-//
-//		System.out.println("Done getting components!");
-//		return allSCCs;
-//	}
 }
 
