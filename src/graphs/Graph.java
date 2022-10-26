@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Stack;
 
 /**
  * Abstract class to represent the Graph ADT. It is assumed that every vertex contains some 
@@ -163,29 +164,60 @@ public abstract class Graph<T>
 			throw new NoSuchElementException();
 		}
 		
-		Set<T> scc = new HashSet<T>();
+		Set<T> scc = new HashSet<>();
+		Set<T> visited = new HashSet<>();
+		Stack<T> toVisit = new Stack<>();
+		Map<T, T> childToParent = new HashMap<T, T>();
 		
 		scc.add(key);
+		toVisit.add(key);
 		
-		sccHelper(key, scc);
+		while (!toVisit.isEmpty())
+		{
+			T vertexToVisit = toVisit.pop();
+			visited.add(vertexToVisit);
+			
+			Iterator<T> successorIterator = successorIterator(vertexToVisit);
+			while (successorIterator.hasNext())
+			{
+				T neighbor = successorIterator.next();
+				if (!visited.contains(neighbor))
+				{
+					childToParent.put(neighbor, vertexToVisit);
+					toVisit.push(neighbor);
+				}
+				else
+				{
+					if (neighbor.equals(key) || scc.contains(neighbor))
+					{
+						T cur = vertexToVisit;
+						while (!cur.equals(key))
+						{
+							scc.add(cur);
+							cur = childToParent.get(cur);
+						}
+					}
+				}
+			}
+		}
 		
 		return scc;
 	}
 	
-	private void sccHelper(T key, Set<T> scc)
-	{
-		Iterator<T> successorIterator = successorIterator(key);
-		
-		while (successorIterator.hasNext())
-		{
-			T successor = successorIterator.next();
-			if (!scc.contains(successor) && shortestPath(successor, key) != null)
-			{
-				scc.add(successor);
-				sccHelper(successor, scc);
-			}
-		}
-	}
+//	private void sccHelper(T key, Set<T> scc)
+//	{
+//		Iterator<T> successorIterator = successorIterator(key);
+//		
+//		while (successorIterator.hasNext())
+//		{
+//			T successor = successorIterator.next();
+//			if (!scc.contains(successor) && shortestPath(successor, key) != null)
+//			{
+//				scc.add(successor);
+//				sccHelper(successor, scc);
+//			}
+//		}
+//	}
 	
 	
 	
