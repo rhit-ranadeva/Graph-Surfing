@@ -364,54 +364,30 @@ public abstract class Graph<T>
 		
 		Set<T> searchSet = keySet();
 		Set<T> component;
-		Map<T, Set<T>> toSkip = new HashMap<T, Set<T>>();
+		
+		int numOutside = 0;
+		int numInside;
 		
 		for (T startVertex : searchSet)
 		{
+			numInside = 0;
 			component = connectedComponent(startVertex);
 			for (T endVertex : component)
 			{
-				if (!(toSkip.containsKey(startVertex) && toSkip.get(startVertex).contains(endVertex)))
+				path = shortestPath(startVertex, endVertex);
+				pathLength = path.size();
+				if (pathLength > maxLength)
 				{
-					path = shortestPath(startVertex, endVertex);
-					pathLength = path.size();
-					if (pathLength > maxLength)
-					{
-						retVal.start = startVertex;
-						retVal.end = endVertex;
-						maxPath = path;
-						maxLength = pathLength;
-						System.out.println("New max length: " + maxLength + "--" + retVal.toString());
-					}
-					else
-					{
-						for (int start = 0; start < path.size(); start++)
-						{
-							for (int end = start; end < path.size(); end++)
-							{
-								if (!toSkip.containsKey(path.get(start)))
-								{
-									Set<T> toPut = new HashSet<T>();
-									toPut.add(path.get(end));
-									toSkip.put(path.get(start), toPut);
-								}
-								else
-								{
-									if (!toSkip.get(path.get(start)).contains(path.get(end)))
-									{
-										Set<T> toPut = toSkip.get(path.get(start));
-										toPut.add(path.get(end));
-										toSkip.remove(path.get(start));
-										toSkip.put(path.get(start), toPut);
-									}
-								}
-							}
-						}
-					}
-					
+					retVal.start = startVertex;
+					retVal.end = endVertex;
+					maxPath = path;
+					maxLength = pathLength;
+					System.out.println("New max length: " + maxLength + "--" + retVal.toString());
 				}
-				
+				numInside++;
+				System.out.println("Done with " + numInside + " out of " + component.size() + " for Vertex " + numOutside);
 			}
+			numOutside++;
 		}
 		System.out.println(maxPath);
 		return retVal;
