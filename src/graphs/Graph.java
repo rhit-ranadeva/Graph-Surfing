@@ -356,6 +356,8 @@ public abstract class Graph<T>
 	
 	public StartEnd longestShortestPath()
 	{
+		// Plan: store all components in a file, check how many have length > 100000
+		// Take 1 startVertex at a time and put into file, capping at 100000
 		StartEnd retVal = new StartEnd();
 		int maxLength = 0;
 		List<T> path;
@@ -386,6 +388,7 @@ public abstract class Graph<T>
 				}
 				numInside++;
 				System.out.println("Done with " + numInside + " out of " + component.size() + " for Vertex " + numOutside);
+				System.out.println("Current length: " + maxLength + "--" + retVal.toString());
 			}
 			numOutside++;
 		}
