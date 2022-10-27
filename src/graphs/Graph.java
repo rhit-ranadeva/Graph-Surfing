@@ -363,14 +363,17 @@ public abstract class Graph<T>
 		int pathLength;
 		
 		Set<T> searchSet = keySet();
+		Set<T> component;
+		Map<T, Set<T>> toSkip = new HashMap<T, Set<T>>();
 		
 		for (T startVertex : searchSet)
 		{
-			for (T endVertex : searchSet)
+			component = connectedComponent(startVertex);
+			for (T endVertex : component)
 			{
-				path = shortestPath(startVertex, endVertex);
-				if (path != null)
+				if (!(toSkip.containsKey(startVertex) && toSkip.get(startVertex).contains(endVertex)))
 				{
+					path = shortestPath(startVertex, endVertex);
 					pathLength = path.size();
 					if (pathLength > maxLength)
 					{
@@ -380,6 +383,32 @@ public abstract class Graph<T>
 						maxLength = pathLength;
 						System.out.println("New max length: " + maxLength + "--" + retVal.toString());
 					}
+					else
+					{
+						for (int start = 0; start < path.size(); start++)
+						{
+							for (int end = start; end < path.size(); end++)
+							{
+								if (!toSkip.containsKey(path.get(start)))
+								{
+									Set<T> toPut = new HashSet<T>();
+									toPut.add(path.get(end));
+									toSkip.put(path.get(start), toPut);
+								}
+								else
+								{
+									if (!toSkip.get(path.get(start)).contains(path.get(end)))
+									{
+										Set<T> toPut = toSkip.get(path.get(start));
+										toPut.add(path.get(end));
+										toSkip.remove(path.get(start));
+										toSkip.put(path.get(start), toPut);
+									}
+								}
+							}
+						}
+					}
+					
 				}
 				
 			}
@@ -387,5 +416,49 @@ public abstract class Graph<T>
 		System.out.println(maxPath);
 		return retVal;
 	}
+	
+	/**
+	 * Finds the strongly-connected component of the provided key.
+	 * @param key
+	 * @return a set containing all data in the strongly connected component of the vertex
+	 * containing key 
+	 * @throws NoSuchElementException if the key is not found in the graph
+	 */
+	public Set<T> connectedComponent(T key) throws NoSuchElementException
+	{
+		// Vertex must exist
+		if (!this.hasVertex(key))
+		{
+			throw new NoSuchElementException();
+		}
+		
+		Set<T> forwardsOnly = new HashSet<T>();
+		
+		Set<T> visited = new HashSet<T>();
+		
+		Stack<T> toVisit = new Stack<T>();
+		
+		toVisit.push(key);
+		while (!toVisit.isEmpty())
+		{
+			T vertexToVisit = toVisit.pop();
+			forwardsOnly.add(vertexToVisit);
+			visited.add(vertexToVisit);
+			
+			Iterator<T> successorIterator = successorIterator(vertexToVisit);
+			while (successorIterator.hasNext())
+			{
+				T neighbor = successorIterator.next();
+				if (!visited.contains(neighbor))
+				{
+					toVisit.push(neighbor);
+				}
+			}
+		}
+		
+		
+		return forwardsOnly;
+	}
+	
 }
 
