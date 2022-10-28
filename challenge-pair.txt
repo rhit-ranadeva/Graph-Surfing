@@ -1,5 +1,5 @@
 Michiel van der Heijden
-Christopher E. Goldthwait
+Megi Luka
 
 Here's my explanation for how I found this challenge pair...
 Lazy brute-force approach using shortestPath. Ran my computer for a couple minutes and it got this. Would've taken forever to get the true max with brute-force.

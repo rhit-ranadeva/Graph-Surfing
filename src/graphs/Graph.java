@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.Stack;
 
@@ -358,84 +358,8 @@ public abstract class Graph<T>
 		}
 	}
 	
-	public void getComponents()
-	{
-		File file = new File("components.txt");
-		boolean result = true;
-
-	    try 
-	    {
-	    	file.createNewFile();
-	    	System.out.println(file.getPath() + " created successfully...");
-	    }
-	    catch (IOException exp) 
-	    {
-	    	result = false;
-	    	System.out.println("Error while creating file: " + exp);
-	    }
-	    
-	    if (result)
-	    {
-	    	try 
-	 	    {
-	    		int count = 1;
-	 		    FileWriter myWriter = new FileWriter("components.txt");
-		    	Set<T> searchSet = keySet();
-		    	Set<T> component;
-		    	for (T startVertex : searchSet)
-		    	{
-		    		myWriter.write(startVertex.toString());
-		    		component = connectedComponent(startVertex);
-		    		myWriter.write(" " + component.size() + "\n");
-		    		for (T endVertex : component)
-		    		{
-		    			myWriter.write(endVertex.toString() + "\n");
-		    		}
-		    		System.out.println(count);
-		    		count++;
-		    	}
-		    	myWriter.close();
-	 	    } 
-	 	    catch (IOException exp) 
-	 	    {
-	 	    	System.out.println("Error while writing file: " + exp);
-	 	    }
-	    }
-	}
-	
-	public Map<String, Set<String>> getMap()
-	{
-		getComponents();
-		Map<String, Set<String>> retMap = new HashMap<String, Set<String>>();
-		try 
-	    {
-	    	File myFile = new File("components.txt");
-	    	Scanner myReader = new Scanner(myFile);
-	    	String curString;
-	    	while (myReader.hasNextLine())
-	    	{
-	    		curString = myReader.next();
-	    		retMap.put(curString, new HashSet<String>());
-	    		int length = myReader.nextInt();
-	    		myReader.nextLine();
-	    		for (int i = 0; i < length; i++)
-	    		{
-	    			retMap.get(curString).add(myReader.nextLine());
-	    		}
-	    	}
-	    	myReader.close();
-	    }
-	    catch (IOException exp) 
-	    {
-	    	System.out.println("Error while reading file: " + exp);
-	    }
-		return retMap;
-	}
-	
 	public StartEnd longestShortestPath()
 	{
-		// Plan: store all components in a file, check how many have length > 100000
-		// Take 1 startVertex at a time and put into file, capping at 100000
 		StartEnd retVal = new StartEnd();
 		int maxLength = 0;
 		List<T> path;
@@ -448,25 +372,38 @@ public abstract class Graph<T>
 		int numOutside = 0;
 		int numInside;
 		
+		long startTime = System.currentTimeMillis();
 		for (T startVertex : searchSet)
 		{
 			numInside = 0;
+			
 			component = connectedComponent(startVertex);
 			for (T endVertex : component)
 			{
-				path = shortestPath(startVertex, endVertex);
-				pathLength = path.size();
-				if (pathLength > maxLength)
+				// Finished vertex 0, 1, 2 and am at 1000/276906 (very close to Michiel's 276907)
+				// Can remove Michiel from potential end vertices
+				if (!startVertex.equals("Michiel van der Heijden") || (startVertex.equals("Michiel van der Heijden") && (numInside > 267193 || numInside == 7716)))
 				{
-					retVal.start = startVertex;
-					retVal.end = endVertex;
-					maxPath = path;
-					maxLength = pathLength;
-					System.out.println("New max length: " + maxLength + "--" + retVal.toString());
+					path = shortestPath(startVertex, endVertex);
+					pathLength = path.size();
+					if (pathLength > maxLength)
+					{
+						retVal.start = startVertex;
+						retVal.end = endVertex;
+						maxPath = path;
+						maxLength = pathLength;
+						System.out.println("New max length: " + maxLength + "--" + retVal.toString());
+					}
 				}
+				
 				numInside++;
-				System.out.println("Done with " + numInside + " out of " + component.size() + " for Vertex " + numOutside);
-				System.out.println("Current length: " + maxLength + "--" + retVal.toString());
+				if (System.currentTimeMillis() - startTime > 30000)
+				{
+					System.out.println("Done with " + numInside + " out of " + component.size() + " for Vertex " + numOutside);
+					System.out.println("Current length: " + maxLength + "--" + retVal.toString());
+					startTime = System.currentTimeMillis();
+				}
+				
 			}
 			numOutside++;
 		}
