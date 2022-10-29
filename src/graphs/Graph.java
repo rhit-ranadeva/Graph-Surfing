@@ -1,10 +1,6 @@
 package graphs;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -168,54 +164,123 @@ public abstract class Graph<T>
 			throw new NoSuchElementException();
 		}
 		
+		/*
+		 * Algorithm: do a DFS forwards and backwards (i.e. using
+		 * successors and predecessors, respectively) starting
+		 * from the input key/vertex. Vertices that emerge in BOTH searches
+		 * are in the strongly connected component of the input vertex.
+		 */
+		
+		/**
+		 * HashSet to store items from the successor DFS
+		 */
 		Set<T> forwardsOnly = new HashSet<T>();
 		
+		/**
+		 * HashSet to store Vertices already visited to avoid repetition
+		 */
 		Set<T> visited = new HashSet<T>();
 		
+		/**
+		 * Use Stack for Vertices to visit since we want DEPTH-first
+		 */
 		Stack<T> toVisit = new Stack<T>();
 		
+		Set<T> toVisitSet = new HashSet<T>();
+		
+		/**
+		 * Push the input key to the stack and begin the search
+		 */
 		toVisit.push(key);
+		toVisitSet.add(key);
+		
+		// While we still have Vertices to visit in the stack...
 		while (!toVisit.isEmpty())
 		{
+			// Visit the Vertex on top of the stack
 			T vertexToVisit = toVisit.pop();
+			toVisitSet.remove(vertexToVisit);
+			
+			// Add this Vertex to both of the "tracking" HashSets
 			forwardsOnly.add(vertexToVisit);
 			visited.add(vertexToVisit);
 			
+			// For each successor of this Vertex...
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
 			while (successorIterator.hasNext())
 			{
+				/*
+				 * Push the successor to the Stack if we haven't seen it before
+				 * AND if it's not already in the Stack. This is why we use
+				 * the toVisitSet--contains() is much faster on the Set than 
+				 * it is on the Stack.
+				 */
 				T neighbor = successorIterator.next();
-				if (!visited.contains(neighbor))
+				if (!visited.contains(neighbor) && !toVisitSet.contains(neighbor))
 				{
+					toVisitSet.add(neighbor);
 					toVisit.push(neighbor);
 				}
 			}
 		}
 		
+		// Reset visited HashSet
 		visited = new HashSet<T>();
+		
+		/*
+		 * Return value HashSet: the strongly connected component
+		 */
 		Set<T> scc = new HashSet<T>();
 		
+		/**
+		 * Push the input key to the stack and begin the search
+		 */
 		toVisit.push(key);
+		toVisitSet.add(key);
+		
+		// While we still have Vertices to visit in the stack...
 		while (!toVisit.isEmpty())
 		{
+			// Visit the Vertex on top of the stack
 			T vertexToVisit = toVisit.pop();
+			toVisitSet.remove(vertexToVisit);
+			
+			// If we saw this Vertex using the successors as well...
 			if (forwardsOnly.contains(vertexToVisit))
 			{
+				/*
+				 * This Vertex IS part of the strongly connected component!
+				 * This is because we could reach this Vertex from the input
+				 * Vertex, and we can reach the input Vertex from this Vertex!
+				 * The same logic would apply for each combination of Vertices
+				 * along the way.
+				 */
 				scc.add(vertexToVisit);
 			}
+			
+			// Add this Vertex to the "tracking" HashSet
 			visited.add(vertexToVisit);
 			
+			// For each predecessor of this Vertex...
 			Iterator<T> predecessorIterator = predecessorIterator(vertexToVisit);
 			while (predecessorIterator.hasNext())
 			{
+				/*
+				 * Push the predecessor to the Stack if we haven't seen it before
+				 * AND if it's not already in the Stack. This is why we use
+				 * the toVisitSet--contains() is much faster on the Set than 
+				 * it is on the Stack.
+				 */
 				T neighbor = predecessorIterator.next();
-				if (!visited.contains(neighbor))
+				if (!visited.contains(neighbor) && !toVisitSet.contains(neighbor))
 				{
+					toVisitSet.add(neighbor);
 					toVisit.push(neighbor);
 				}
 			}
 		}
 		
+		// Return the strongly-connected component
 		return scc;
 	}
 	
@@ -341,81 +406,147 @@ public abstract class Graph<T>
 			retList.add(curVertex);
 		}
 	}
+
+	/********************************************/
+	/***EVERYTHING*BELOW*HERE*IS*FOR*THE*BONUS***/
+	/********************************************/
 	
+	/**
+	 * Simple wrapper class with 2 Vertices' data
+	 * 
+	 * @author Vineet Ranade
+	 *
+	 */
 	public class StartEnd
 	{
+		/**
+		 * Start Vertex data
+		 */
 		T start;
+		
+		/**
+		 * End Vertex data
+		 */
 		T end;
+		
+		/**
+		 * Constructs a StartEnd object with empty data
+		 */
 		public StartEnd()
 		{
 			this.start = null;
 			this.end = null;
 		}
 		
+		@Override
 		public String toString()
 		{
 			return this.start.toString() + " and " + this.end.toString();
 		}
 	}
 	
+	/**
+	 * Finds the longest shortest path between two vertices in a Graph
+	 * 
+	 * @return
+	 * 		Wrapper object containing the start and end vertices yielding
+	 * 		the longest shortest path
+	 */
 	public StartEnd longestShortestPath()
 	{
+		/*
+		 * The final return value
+		 */
 		StartEnd retVal = new StartEnd();
+		
+		/*
+		 * The length of the longest shortest path so far
+		 */
 		int maxLength = 0;
+		
+		/*
+		 * The current shortest path
+		 */
 		List<T> path;
+		
+		/*
+		 * The longest shortest path so far
+		 */
 		List<T> maxPath = new ArrayList<T>();
+		
+		/*
+		 * The length of the current shortest path
+		 */
 		int pathLength;
 		
+		/*
+		 * Set of all Vertices in the Graph
+		 */
 		Set<T> searchSet = keySet();
+		
+		/*
+		 * The component (Set of reachable Vertices)
+		 * of the current Vertex
+		 */
 		Set<T> component;
 		
-		int numOutside = 0;
+		/*
+		 * The next 2 variables were used because I never actually
+		 * got this method to finish running! I simply printed
+		 * the longest shortest path every now and then using
+		 * these variables
+		 */
+		
+		/*
+		 * Number of Vertices traversed in the inner for loop
+		 */
 		int numInside;
 		
-		long startTime = System.currentTimeMillis();
+		/*
+		 * Which Vertex we're on in the outer for loop
+		 */
+		int numOutside = 1;
+		
+		// For each Vertex in the Graph...
 		for (T startVertex : searchSet)
 		{
 			numInside = 0;
 			
+			// For each other Vertex reachable from this Vertex...
 			component = connectedComponent(startVertex);
 			for (T endVertex : component)
 			{
-				// Finished vertex 0, 1, 2 and am at 1000/276906 (very close to Michiel's 276907)
-				// Can remove Michiel from potential end vertices
-				if (!startVertex.equals("Michiel van der Heijden") || (startVertex.equals("Michiel van der Heijden") && (numInside > 267193 || numInside == 7716)))
-				{
-					path = shortestPath(startVertex, endVertex);
-					pathLength = path.size();
-					if (pathLength > maxLength)
-					{
-						retVal.start = startVertex;
-						retVal.end = endVertex;
-						maxPath = path;
-						maxLength = pathLength;
-						System.out.println("New max length: " + maxLength + "--" + retVal.toString());
-					}
-				}
+				// Compute shortest path
+				path = shortestPath(startVertex, endVertex);
 				
+				// Compute length
+				pathLength = path.size();
+				
+				// If this is the longest shortest path, update the variables
+				if (pathLength > maxLength)
+				{
+					retVal.start = startVertex;
+					retVal.end = endVertex;
+					maxPath = path;
+					maxLength = pathLength;
+					System.out.println("New max length: " + maxLength + "--" + retVal.toString());
+				}
 				numInside++;
-				if (System.currentTimeMillis() - startTime > 30000)
-				{
-					System.out.println("Done with " + numInside + " out of " + component.size() + " for Vertex " + numOutside);
-					System.out.println("Current length: " + maxLength + "--" + retVal.toString());
-					startTime = System.currentTimeMillis();
-				}
-				
+				System.out.println("Done with " + numInside + " out of " + component.size() + " for Vertex " + numOutside);
 			}
+			
 			numOutside++;
 		}
+		
+		// Return the start and end Vertices yielding longest shortest path
 		System.out.println(maxPath);
 		return retVal;
 	}
 	
 	/**
-	 * Finds the strongly-connected component of the provided key.
+	 * Finds the (NOT strongly) connected component of the provided key.
 	 * @param key
-	 * @return a set containing all data in the strongly connected component of the vertex
-	 * containing key 
+	 * @return a set containing all Vertices reachable from the Vertex containing key
 	 * @throws NoSuchElementException if the key is not found in the graph
 	 */
 	public Set<T> connectedComponent(T key) throws NoSuchElementException
@@ -426,31 +557,67 @@ public abstract class Graph<T>
 			throw new NoSuchElementException();
 		}
 		
+		/*
+		 * Algorithm: do a DFS forwards and backwards (i.e. using
+		 * successors and predecessors, respectively) starting
+		 * from the input key/vertex. Vertices that emerge in BOTH searches
+		 * are in the strongly connected component of the input vertex.
+		 */
+		
+		/**
+		 * HashSet to store items from the successor DFS
+		 */
 		Set<T> forwardsOnly = new HashSet<T>();
 		
+		/**
+		 * HashSet to store Vertices already visited to avoid repetition
+		 */
 		Set<T> visited = new HashSet<T>();
 		
+		/**
+		 * Use Stack for Vertices to visit since we want DEPTH-first
+		 */
 		Stack<T> toVisit = new Stack<T>();
 		
+		Set<T> toVisitSet = new HashSet<T>();
+		
+		/**
+		 * Push the input key to the stack and begin the search
+		 */
 		toVisit.push(key);
+		toVisitSet.add(key);
+		
+		// While we still have Vertices to visit in the stack...
 		while (!toVisit.isEmpty())
 		{
+			// Visit the Vertex on top of the stack
 			T vertexToVisit = toVisit.pop();
+			toVisitSet.remove(vertexToVisit);
+			
+			// Add this Vertex to both of the "tracking" HashSets
 			forwardsOnly.add(vertexToVisit);
 			visited.add(vertexToVisit);
 			
+			// For each successor of this Vertex...
 			Iterator<T> successorIterator = successorIterator(vertexToVisit);
 			while (successorIterator.hasNext())
 			{
+				/*
+				 * Push the successor to the Stack if we haven't seen it before
+				 * AND if it's not already in the Stack. This is why we use
+				 * the toVisitSet--contains() is much faster on the Set than 
+				 * it is on the Stack.
+				 */
 				T neighbor = successorIterator.next();
-				if (!visited.contains(neighbor))
+				if (!visited.contains(neighbor) && !toVisitSet.contains(neighbor))
 				{
+					toVisitSet.add(neighbor);
 					toVisit.push(neighbor);
 				}
 			}
 		}
 		
-		
+		// Return all reachable Vertices
 		return forwardsOnly;
 	}
 	
